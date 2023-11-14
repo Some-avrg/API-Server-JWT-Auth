@@ -3,6 +3,7 @@ import UserToken from "../models/UserToken";
 import jwt from "jsonwebtoken";
 import { refreshTokenBodyValidation } from "../utils/validationSchema";
 import verifyRefreshToken from "../utils/verifyRefreshToken";
+import generateTokens from "../utils/generateTokens";
 
 const router = Router();
 
@@ -16,17 +17,16 @@ router.post("/", async (req, res) => {
       .json({ error: true, message: error.details[0].message });
 
   verifyRefreshToken(req.body.refreshToken)
-    .then(({ tokenDetails }) => {
-      const payload = { _id: tokenDetails._id, roles: tokenDetails.roles };
-      const accessToken = jwt.sign(
-        payload,
-        process.env.ACCESS_TOKEN_PRIVATE_KEY,
-        { expiresIn: "14m" }
-      );
+    .then(async ({ tokenDetails }) => {
+      
+      //создаём новую пару токенов, чтобы старая стла недействительна
+      const { accessToken, refreshToken } = await generateTokens(tokenDetails);
+
       res.status(200).json({
         error: false,
+        refreshToken,
         accessToken,
-        message: "Access token created successfully", 
+        message: "New access token created successfully", 
       });
     })
     .catch((err) => res.status(400).json(err));
@@ -53,7 +53,7 @@ router.delete("/", async (req, res) => {
         .json({ error: false, message: "You have already logged out" });
 
     await userToken.deleteOne({ token: req.body.refreshToken });
-    
+
     res.status(200).json({ error: false, message: "Logged Out Sucessfully" });
   } catch (err) {
     console.log(err);
