@@ -1,6 +1,7 @@
 import { Router } from "express";
 import User from "../models/User";
 import bcrypt from "bcrypt";
+import UserToken from "../models/UserToken";
 import generateTokens from "../utils/generateTokens";
 import {
   signUpBodyValidation,
@@ -9,14 +10,87 @@ import {
 
 const router = Router();
 
-router.get("/getInfo", async (req, res) => {
+// delete User
+router.delete("/deleteUser", async (req, res) => {
   try {
-    return res.status(200).json({ error: false, message: "Well, thats it" });
+    //Проверка на подлинность логина/пароля
+    const { error } = logInBodyValidation(req.body);
+    if (error)
+      return res
+        .status(400)
+        .json({ error: true, message: error.details[0].message });
+
+    const user = await User.findOne({ email: req.body.email });
+    if (!user)
+      return res
+        .status(401)
+        .json({ error: true, message: "Invalid email or password" });
+
+    const verifiedPassword = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
+    if (!verifiedPassword)
+      return res
+        .status(401)
+        .json({ error: true, message: "Invalid email or password" });
+
+    //создаём новую пару токенов, чтобы старая стла недействительна
+    const { accessToken, refreshToken } = await generateTokens(user);
+    //удаляем пользователя из бд
+    await User.deleteOne({ email: req.body.email });
+
+    await UserToken.deleteOne({ token: refreshToken });
+
+    res.status(200).json({
+      error: false,
+      message: "User deleted successfully",
+    });
+
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: true, message: "Internal Server Error" });
   }
 });
+
+// update User
+router.post("/updateUser", async (req, res) => {
+    try {
+      //Проверка на подлинность логина/пароля
+      const { error } = signUpBodyValidation(req.body);
+      if (error)
+        return res
+          .status(400)
+          .json({ error: true, message: error.details[0].message });
+  
+      const user = await User.findOne({ email: req.body.email });
+      if (!user)
+        return res
+          .status(401)
+          .json({ error: true, message: "Invalid email or password" });
+  
+      const verifiedPassword = await bcrypt.compare(
+        req.body.password,
+        user.password
+      );
+      if (!verifiedPassword)
+        return res
+          .status(401)
+          .json({ error: true, message: "Invalid email or password" });
+  
+      //обновляем имя пользователя
+      await User.updateOne({ email: req.body.email }, {userName: req.body.userName});
+  
+      res.status(200).json({
+        error: false,
+        message: "Username updated successfully",
+      });
+  
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: true, message: "Internal Server Error" });
+    }
+  });
 
 // signup
 router.post("/signUp", async (req, res) => {

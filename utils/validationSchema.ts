@@ -25,6 +25,7 @@ const refreshTokenBodyValidation = (body) => {
     return schema.validate(body);
 };
 
+
 export {
     signUpBodyValidation,
     logInBodyValidation,

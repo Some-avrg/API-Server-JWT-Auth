@@ -50,9 +50,10 @@ router.delete("/", async (req, res) => {
     if (!userToken)
       return res
         .status(200)
-        .json({ error: false, message: "Logged Out Sucessfully" });
+        .json({ error: false, message: "You have already logged out" });
 
-    await userToken.deleteOne;
+    await userToken.deleteOne({ token: req.body.refreshToken });
+    
     res.status(200).json({ error: false, message: "Logged Out Sucessfully" });
   } catch (err) {
     console.log(err);
