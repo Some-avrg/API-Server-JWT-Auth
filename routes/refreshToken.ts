@@ -8,6 +8,7 @@ const router = Router();
 
 // get new access token
 router.post("/", async (req, res) => {
+  try{
   const { error } = refreshTokenBodyValidation(req.body);
   if (error)
     return res
@@ -25,10 +26,15 @@ router.post("/", async (req, res) => {
       res.status(200).json({
         error: false,
         accessToken,
-        message: "Access token created successfully",
+        message: "Access token created successfully", 
       });
     })
     .catch((err) => res.status(400).json(err));
+  }catch (err) {
+    console.log(err);
+    res.status(500).json({ error: true, message: "Internal Server Error" });
+  }
+
 });
 
 // logout

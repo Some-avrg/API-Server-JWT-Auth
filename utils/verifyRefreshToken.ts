@@ -2,24 +2,27 @@ import UserToken from "../models/UserToken";
 import jwt from "jsonwebtoken";
 
 const verifyRefreshToken = (refreshToken) => {
+  try {
     const privateKey = process.env.REFRESH_TOKEN_PRIVATE_KEY;
 
-    return new Promise((resolve, reject) => {
-        UserToken.findOne({ token: refreshToken }, (err, doc) => {
-            if (!doc)
-                return reject({ error: true, message: "Invalid refresh token" });
+    return new Promise(async (resolve, reject) => {
+      const doc = await UserToken.findOne({ token: refreshToken });
 
-            jwt.verify(refreshToken, privateKey, (err, tokenDetails) => {
-                if (err)
-                    return reject({ error: true, message: "Invalid refresh token" });
-                resolve({
-                    tokenDetails,
-                    error: false,
-                    message: "Valid refresh token",
-                });
-            });
+      if (!doc)
+        return reject({ error: true, message: "Invalid refresh token" });
+      jwt.verify(refreshToken, privateKey, (err, tokenDetails) => {
+        if (err)
+          return reject({ error: true, message: "Invalid refresh token" });
+        resolve({
+          tokenDetails,
+          error: false,
+          message: "Valid refresh token",
         });
+      });
     });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 export default verifyRefreshToken;
