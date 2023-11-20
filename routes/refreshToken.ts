@@ -1,7 +1,6 @@
 import { Router } from "express";
 import UserToken from "../models/UserToken";
 import jwt from "jsonwebtoken";
-import { refreshTokenBodyValidation } from "../utils/validationSchema";
 import verifyRefreshToken from "../utils/verifyRefreshToken";
 import generateTokens from "../utils/generateTokens";
 
