@@ -9,7 +9,7 @@ const verifyRefreshToken = (refreshToken) => {
       const doc = await UserToken.findOne({ token: refreshToken });
 
       if (!doc)
-        return reject({ error: true, message: "Invalid refresh token" });
+        return reject({ error: true, message: "Invalid refresh token " });
       jwt.verify(refreshToken, privateKey, (err, tokenDetails) => {
         if (err)
           return reject({ error: true, message: "Invalid refresh token" });
