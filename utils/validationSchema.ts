@@ -1,11 +1,20 @@
 import Joi from "joi";
 import passwordComplexity from "joi-password-complexity";
 
+const complexityOptions = {
+    min: 8,
+    max: 255,
+}
+
 const signUpBodyValidation = (body) => {
     const schema = Joi.object({
         userName: Joi.string().required().label("User Name"),
         email: Joi.string().email().required().label("Email"),
-        password: passwordComplexity().required().label("Password"),
+        password: passwordComplexity(complexityOptions).required().label("Password"),
+        phone: Joi.string(),
+        website: Joi.string(),
+        intro: Joi.string(),
+        gender: Joi.string(),
     });
     return schema.validate(body);
 };

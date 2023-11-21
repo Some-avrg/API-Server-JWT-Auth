@@ -4,6 +4,7 @@ import dbConnect from "./dbConnect";
 import authRoutes from "./routes/auth";
 import refreshTokenRoutes from "./routes/refreshToken";
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 const app = express();
 
@@ -12,6 +13,7 @@ dbConnect();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
 
 app.use("/api", authRoutes);
 app.use("/api/refreshToken", refreshTokenRoutes);
