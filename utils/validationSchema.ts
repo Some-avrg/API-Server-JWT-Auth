@@ -8,13 +8,13 @@ const complexityOptions = {
 
 const signUpBodyValidation = (body) => {
     const schema = Joi.object({
-        userName: Joi.string().required().label("User Name"),
-        email: Joi.string().email().required().label("Email"),
-        password: passwordComplexity(complexityOptions).required().label("Password"),
-        phone: Joi.string(),
-        website: Joi.string(),
-        intro: Joi.string(),
-        gender: Joi.string(),
+        username: Joi.string().required(),
+        email: Joi.string().email().required(),
+        password: passwordComplexity(complexityOptions).required(),
+        phone: Joi.string().empty(''),
+        website: Joi.string().empty(''),
+        intro: Joi.string().empty(''),
+        gender: Joi.string().required(),
     });
     return schema.validate(body);
 };

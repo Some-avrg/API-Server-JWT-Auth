@@ -96,16 +96,23 @@ router.post("/updateUser", async (req, res) => {
 router.post("/signup", async (req, res) => {
   try {
     const { error } = signUpBodyValidation(req.body);
+    console.log(req.body);
     if (error)
       return res
         .status(400)
         .json({ error: true, message: error.details[0].message });
 
-    const user = await User.findOne({ email: req.body.email });
+    let user = await User.findOne({ email: req.body.email });
     if (user)
       return res
         .status(400)
         .json({ error: true, message: "User with given email already exist" });
+
+        user = await User.findOne({ username: req.body.username });
+    if (user)
+      return res
+        .status(400)
+        .json({ error: true, message: "User with given username already exist" });
 
     const salt = await bcrypt.genSalt(Number(process.env.SALT));
     const hashPassword = await bcrypt.hash(req.body.password, salt);
