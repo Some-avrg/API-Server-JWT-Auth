@@ -25,4 +25,24 @@ const verifyRefreshToken = (refreshToken) => {
   }
 };
 
-export default verifyRefreshToken;
+const verifyAccessToken = (accessToken) => {
+  try {
+    const privateKey = process.env.REFRESH_TOKEN_PRIVATE_KEY;
+
+    return new Promise(async (resolve, reject) => {
+      jwt.verify(accessToken, privateKey, (err, tokenDetails) => {
+        if (err)
+          return reject({ error: true, message: "Invalid access token" });
+        resolve({
+          tokenDetails,
+          error: false,
+          message: "Valid access token",
+        });
+      });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export {verifyRefreshToken, verifyAccessToken};

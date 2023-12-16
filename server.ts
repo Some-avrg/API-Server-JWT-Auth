@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import dbConnect from "./dbConnect";
 import authRoutes from "./routes/auth";
 import refreshTokenRoutes from "./routes/refreshToken";
+import appRoutes from "./routes/app";
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
@@ -17,10 +18,11 @@ app.use(cookieParser());
 app.use(
   cors({
       credentials: true,
-      origin: "http://localhost:3000"
+      origin: true,
   })
 );
-
+ 
+app.use("/api", appRoutes);
 app.use("/api", authRoutes);
 app.use("/api/refreshToken", refreshTokenRoutes);
 

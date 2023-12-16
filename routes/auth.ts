@@ -23,7 +23,7 @@ router.delete("/deleteUser", async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user)
       return res
-        .status(401)
+        .status(403)
         .json({ error: true, message: "Invalid email or password" });
 
     const verifiedPassword = await bcrypt.compare(
@@ -32,7 +32,7 @@ router.delete("/deleteUser", async (req, res) => {
     );
     if (!verifiedPassword)
       return res
-        .status(401)
+        .status(403)
         .json({ error: true, message: "Invalid email or password" });
 
     //создаём новую пару токенов, чтобы старая стла недействительна
@@ -65,7 +65,7 @@ router.post("/updateUser", async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user)
       return res
-        .status(401)
+        .status(403)
         .json({ error: true, message: "Invalid email or password" });
 
     const verifiedPassword = await bcrypt.compare(
@@ -74,7 +74,7 @@ router.post("/updateUser", async (req, res) => {
     );
     if (!verifiedPassword)
       return res
-        .status(401)
+        .status(403)
         .json({ error: true, message: "Invalid email or password" });
 
     //обновляем имя пользователя
@@ -106,12 +106,12 @@ router.post("/signup", async (req, res) => {
     let user = await User.findOne({ email: req.body.email });
     if (user)
       return res
-        .status(400)
+        .status(403)
         .json({ error: true, message: "User with given email already exist" });
 
     user = await User.findOne({ username: req.body.username });
     if (user)
-      return res.status(400).json({
+      return res.status(403).json({
         error: true,
         message: "User with given username already exist",
       });
@@ -142,7 +142,7 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ username: req.body.username });
     if (!user)
       return res
-        .status(401)
+        .status(403)
         .json({ error: true, message: "Invalid username or password" });
 
     const verifiedPassword = await bcrypt.compare(
@@ -151,24 +151,17 @@ router.post("/login", async (req, res) => {
     );
     if (!verifiedPassword)
       return res
-        .status(401)
+        .status(403)
         .json({ error: true, message: "Invalid username or password" });
 
     const { accessToken, refreshToken } = await generateTokens(user);
 
     res
-      .cookie("jwt", refreshToken, 
-      {
-        httpOnly: false,
-        secure: false,
-        sameSite: "none",
-        maxAge: 604800000, //7 days
-      } 
-      )
       .status(200)
       .json({
         error: false,
         accessToken,
+        refreshToken,
         message: "Logged in sucessfully",
       });
   } catch (err) {

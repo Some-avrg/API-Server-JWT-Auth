@@ -1,7 +1,7 @@
 import { Router } from "express";
 import UserToken from "../models/UserToken";
 import jwt from "jsonwebtoken";
-import verifyRefreshToken from "../utils/verifyRefreshToken";
+import { verifyRefreshToken } from "../utils/verifyRefreshToken";
 import generateTokens from "../utils/generateTokens";
 
 const router = Router();
@@ -9,28 +9,21 @@ const router = Router();
 // get new access token
 router.post("/", async (req, res) => {
   try {
-    if (!req.cookies.jwt)
+    if (!req.body.refreshToken) 
       return res
         .status(400)
-        .json({ error: true, message: "jwt token not found" });
+        .json({ error: true, message: "refresh token not found" });
 
-    //res.clearCookie("jwt");
-
-    verifyRefreshToken(req.cookies.jwt)
+    verifyRefreshToken(req.body.refreshToken)
       .then(async ({ tokenDetails, error, message }) => {
         //создаём новую пару токенов, чтобы старая стaла недействительна
         const { accessToken, refreshToken } =
           await generateTokens(tokenDetails);
 
-        res.cookie("jwt", refreshToken, {
-          httpOnly: true,
-          secure: true,
-          sameSite: "Strict",
-          maxAge: 604800000, //7 days
-        });
         res.status(200).json({
           error: false,
           accessToken,
+          refreshToken,
           message: "New access token created successfully",
         });
       })
